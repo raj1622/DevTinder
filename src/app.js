@@ -12,15 +12,19 @@ app.post("/signup", async(req, res)=>{
          await user.save();
          res.send("Data saved successsfully");
      }catch(err){
-         res.staus(400).send("Error saving user to databse"+ err.message);
+         res.status(400).send("Error saving user to databse"+ err.message);
      }
 });
 
 app.get("/user", async(req, res)=>{
     const userEmail=req.body.emailId;
     try{
-        const users=await User.find({emailId: userEmail});
-        res.send(users);
+        const user=await User.findOne({emailId: userEmail});
+        if(!user){
+            res.send("No user found");
+        }else{
+            res.send(user);
+        }
     }catch(err){
         res.status(400).send("Something went wrong");
     }
@@ -35,6 +39,50 @@ app.get("/feed", async(req, res)=>{
             res.send(users);    
         }
         
+    }catch(err){
+        res.status(400).send("Something went wrong");
+    }
+});
+
+app.delete("/user", async(req, res)=>{
+    const userId=req.body.userId;
+    try{
+        const isExist=await User.findOne({_id: userId});
+        if(!isExist){
+            res.status(404).send("User does not exist");
+        }else{
+            const user=await User.findByIdAndDelete({_id:userId});
+            res.send("User deleted Successfully");
+        }
+    }catch(err){
+        res.status(400).send("Something went wrong"+ err.message);
+    }
+});
+
+app.patch("/user", async(req, res)=>{
+    const userId=req.body.userId;
+    const data=req.body;
+    try{
+        const user=await User.findByIdAndUpdate({_id: userId}, data, {runValidators:true});
+        res.send("Data updated successfully");
+    }catch(err){
+        res.status(400).send("Something went wrong");
+    }
+});
+
+app.patch("/user/updateByEmail", async(req, res)=>{
+    const emailId=req.body.emailId;
+    const data=req.body;
+    try{
+        const user=await User.findOne({emailId:emailId});
+        
+        if(!user){
+            res.send("No such user Exist");
+        }else{
+            const userId=user._id;
+            await User.findByIdAndUpdate(userId, data, {runValidators:true}); 
+            res.send("User updated Sucessfully");
+        }   
     }catch(err){
         res.status(400).send("Something went wrong");
     }
