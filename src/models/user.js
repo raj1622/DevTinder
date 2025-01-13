@@ -1,4 +1,5 @@
 const mongoose=require('mongoose');
+const validator=require('validator');
 
 const userSchema= new mongoose.Schema({
     firstName:{
@@ -20,12 +21,22 @@ const userSchema= new mongoose.Schema({
         trim:true,
         minLength:5,
         maxLength:50,
+        validate(value){
+            if(!validator.isEmail(value)){
+                throw new Error("Emial not valid");
+            }
+        },
     },
     password:{
         type:String,
         required:true,
         minLength:5,
         maxLength:50,
+        validate(value){
+            if(!validator.isStrongPassword(value)){
+                throw new Error("Enter a String Password");
+            }
+        }
     },
     age:{
         type:Number,
@@ -42,6 +53,11 @@ const userSchema= new mongoose.Schema({
     photoUrl:{
         type:String,
         default:"https://media.istockphoto.com/id/610003972/vector/vector-businessman-black-silhouette-isolated.jpg?s=612x612&w=0&k=20&c=Iu6j0zFZBkswfq8VLVW8XmTLLxTLM63bfvI6uXdkacM=",
+        validate(value){
+            if(!validator.isURL(value)){
+                throw new Error("PhotoUrl not valid");
+            }
+        }
 
     },
     about:{
